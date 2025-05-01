@@ -1,40 +1,3 @@
-'''
-import cv2
-import os
-import csv
-from datetime import datetime
-from model.detector import calculate_fake_risk
-from camera.virtual_cam import start_virtual_camera
-
-LOG_DIR = "logs"
-os.makedirs(LOG_DIR, exist_ok=True)
-LOG_PATH = os.path.join(LOG_DIR, "risk_log.csv")
-
-def overlay_risk_score(frame, risk_score):
-    text = f"FAKE RISK: {risk_score}%"
-    color = (0, 0, 255) if risk_score > 60 else (0, 255, 0)
-    cv2.putText(frame, text, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, color, 3)
-    return frame
-
-def get_frame_overlay(frame):
-    risk_score = calculate_fake_risk(frame)
-
-    # log score
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(LOG_PATH, "a", newline="") as log_file:
-        writer = csv.writer(log_file)
-        writer.writerow([timestamp, risk_score])
-
-    return overlay_risk_score(frame, risk_score)
-
-if __name__ == "__main__":
-    print("Starting PhantomShield virtual camera...")
-    start_virtual_camera(get_frame_overlay)
-
-'''
-
-# app.py
-
 import cv2
 import os
 import csv
@@ -46,28 +9,38 @@ LOG_DIR = "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_PATH = os.path.join(LOG_DIR, "risk_log.csv")
 
-def overlay_risk_score(frame, risk_score):
-    text = f"FAKE RISK: {risk_score}%"
-    color = (0, 0, 255) if risk_score > 60 else (0, 255, 0)
-    cv2.putText(frame, text, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, color, 3)
+smoothed_score = 0
+
+def amplify_score(raw):
+    gain = 1.5  # Amplify mid-high scores
+    amplified = min(max(raw * gain, 0), 100)
+    return int(amplified)
+
+def overlay_warning(frame, show_warning):
+    if show_warning:
+        text = "DEEPFAKE WARNING"
+        cv2.putText(frame, text, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 3)
     return frame
 
 def get_frame_overlay(frame):
+    global smoothed_score
     raw_score = calculate_fake_risk(frame)
-    threshold = 60  # you decide where to draw the "fake" line
-    risk_score = min(max(raw_score, 0), 100)
+    amplified_score = amplify_score(raw_score)
+    smoothed_score = 0.85 * smoothed_score + 0.15 * amplified_score
+    risk_score = int(smoothed_score)
 
-    if risk_score >= threshold:
-        print(f"[ALERT] FAKE RISK HIGH: {risk_score}%")
+    show_warning = risk_score > 60
 
-    # log + overlay
+    if show_warning:
+        print(f"[ALERT] DEEPFAKE WARNING ({risk_score}%)")
+
+    # Save log (full score still saved for analysis)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(LOG_PATH, "a", newline="") as log_file:
         writer = csv.writer(log_file)
         writer.writerow([timestamp, risk_score])
 
-    return overlay_risk_score(frame, risk_score)
-
+    return overlay_warning(frame, show_warning)
 
 if __name__ == "__main__":
     print("PhantomShield: Testing OBS Virtual Cam input")
