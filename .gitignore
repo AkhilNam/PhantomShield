@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+venv311/
+env/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
+logs/
+*.log
+risk_log.csv
+
+# Model files (if you want to exclude them)
+*.h5
+*.pth
+*.pt
+
+# Compiled files
+*.spec
+*.exe
+*.dll
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Distribution
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Local development settings
+.env

@@ -1,0 +1,20 @@
+opencv-python
+opencv-contrib-python
+pyvirtualcam
+torch
+torchvision
+numpy
+matplotlib
+pillow
+scikit-image
+tensorflow
+
+# Optional audio + GUI
+webrtcvad
+sounddevice
+pydub
+streamlit
+tk
+
+# Dev / packaging
+pyinstaller
