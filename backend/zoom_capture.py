@@ -5,29 +5,75 @@ import numpy as np
 import os
 import time
 import csv
+import json
 from collections import deque
 from model.detector import calculate_fake_risk
+import sys
+import threading
+sys.stdout.reconfigure(encoding='utf-8')
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # --- Config ---
-GRID_ROWS = 1
-GRID_COLS = 2
-THRESHOLD = 50          # Alert when smoothed average exceeds this
-GAIN = 1.2           # Amplification gain
-BUFFER_SIZE = 40         # Number of frames to average
+config = {
+    'gridRows': 1,
+    'gridCols': 2,
+    'threshold': 50,    # Alert when smoothed average exceeds this
+    'gain': 1.2,       # Amplification gain
+    'bufferSize': 40   # Number of frames to average
+}
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 os.makedirs("logs/faces", exist_ok=True)
 LOG_PATH = "logs/risk_log.csv"
 
 # Score buffers for smoothing
-risk_buffers = {
-    (row, col): deque(maxlen=BUFFER_SIZE)
-    for row in range(GRID_ROWS) for col in range(GRID_COLS)
-}
+def create_risk_buffers():
+    return {
+        (row, col): deque(maxlen=config['bufferSize'])
+        for row in range(config['gridRows']) 
+        for col in range(config['gridCols'])
+    }
+
+risk_buffers = create_risk_buffers()
 alerted_tiles = set()  # Tiles we've already notified once
 
+def send_alert(tile, risk):
+    alert = {
+        "type": "alert",
+        "tile": f"Tile {tile[0]},{tile[1]}",
+        "risk": int(risk)
+    }
+    print(json.dumps(alert))
+    sys.stdout.flush()
+
+def send_status(status):
+    status_msg = {
+        "type": "status",
+        "message": status
+    }
+    print(json.dumps(status_msg))
+    sys.stdout.flush()
+
+def send_tiles(count):
+    tiles_msg = {
+        "type": "tiles",
+        "count": count
+    }
+    print(json.dumps(tiles_msg))
+    sys.stdout.flush()
+
+def send_config_response(success, error=None):
+    response = {
+        "type": "config-response",
+        "success": success
+    }
+    if error:
+        response["error"] = str(error)
+    print(json.dumps(response))
+    sys.stdout.flush()
+
 def amplify_score(raw):
-    return min(max(raw * GAIN, 0), 100)
+    return min(max(raw * config['gain'], 0), 100)
 
 def get_zoom_window_bbox():
     for window in gw.getWindowsWithTitle("Zoom"):
@@ -48,11 +94,14 @@ def capture_zoom_region(bbox):
         return cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
 def scan_zoom_tiles_with_face_detection(frame):
-    tile_height = frame.shape[0] // GRID_ROWS
-    tile_width = frame.shape[1] // GRID_COLS
+    global risk_buffers
+    
+    tile_height = frame.shape[0] // config['gridRows']
+    tile_width = frame.shape[1] // config['gridCols']
+    active_tiles = 0
 
-    for row in range(GRID_ROWS):
-        for col in range(GRID_COLS):
+    for row in range(config['gridRows']):
+        for col in range(config['gridCols']):
             tile_coords = (row, col)
 
             if tile_coords in alerted_tiles:
@@ -68,6 +117,7 @@ def scan_zoom_tiles_with_face_detection(frame):
             faces = face_cascade.detectMultiScale(gray_tile, scaleFactor=1.3, minNeighbors=5)
 
             if len(faces) > 0:
+                active_tiles += 1
                 (fx, fy, fw, fh) = max(faces, key=lambda f: f[2] * f[3])
                 pad = int(0.2 * min(fw, fh))
                 fx, fy = max(0, fx - pad), max(0, fy - pad)
@@ -86,6 +136,8 @@ def scan_zoom_tiles_with_face_detection(frame):
                 continue  # ignore low-confidence noise
 
             amplified_score = amplify_score(raw_score)
+            if tile_coords not in risk_buffers:
+                risk_buffers[tile_coords] = deque(maxlen=config['bufferSize'])
             risk_buffers[tile_coords].append(amplified_score)
 
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -94,19 +146,51 @@ def scan_zoom_tiles_with_face_detection(frame):
                 writer.writerow([timestamp, f"tile_{row}_{col}", int(amplified_score)])
 
             # only alert once per tile
-            if len(risk_buffers[tile_coords]) == BUFFER_SIZE:
-                avg = sum(risk_buffers[tile_coords]) / BUFFER_SIZE
-                if avg > THRESHOLD:
-                    print(f"⚠️  Tile ({row},{col}) may be a deepfake. Avg risk: {int(avg)}%")
+            if len(risk_buffers[tile_coords]) == config['bufferSize']:
+                avg = sum(risk_buffers[tile_coords]) / config['bufferSize']
+                if avg > config['threshold']:
+                    send_alert(tile_coords, avg)
                     cv2.imwrite(f"logs/faces/tile_{row}_{col}_{int(avg)}_{int(time.time())}.jpg", cropped_image)
                     alerted_tiles.add(tile_coords)
 
+    send_tiles(active_tiles)
+
+def handle_config_update():
+    while True:
+        try:
+            line = sys.stdin.readline()
+            if not line:
+                break
+                
+            new_config = json.loads(line)
+            if new_config['type'] == 'config':
+                # Update configuration
+                config['gridRows'] = new_config['gridRows']
+                config['gridCols'] = new_config['gridCols']
+                config['threshold'] = new_config['threshold']
+                config['gain'] = new_config['gain']
+                config['bufferSize'] = new_config['bufferSize']
+                
+                # Reset buffers and alerts
+                global risk_buffers, alerted_tiles
+                risk_buffers = create_risk_buffers()
+                alerted_tiles.clear()
+                
+                send_config_response(True)
+                send_status("Configuration updated")
+        except Exception as e:
+            send_config_response(False, str(e))
+
 if __name__ == "__main__":
+    # Start config update thread
+    config_thread = threading.Thread(target=handle_config_update, daemon=True)
+    config_thread.start()
+
     try:
         bbox = get_zoom_window_bbox()
-        print(f"[INFO] Capturing Zoom window at {bbox}")
+        send_status(f"Capturing Zoom window at {bbox}")
     except RuntimeError as e:
-        print(f"[ERROR] {e}")
+        send_status(f"ERROR: {e}")
         exit()
 
     while True:

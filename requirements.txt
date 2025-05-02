@@ -1,13 +1,14 @@
-opencv-python
+opencv-python>=4.5.0
 opencv-contrib-python
 pyvirtualcam
 torch
 torchvision
-numpy
+numpy>=1.19.0
 matplotlib
 pillow
 scikit-image
-tensorflow
+tensorflow>=2.4.0
+keras>=2.4.0
 
 # Optional audio + GUI
 webrtcvad
@@ -18,3 +19,6 @@ tk
 
 # Dev / packaging
 pyinstaller
+
+pygetwindow>=0.0.9
+mss>=6.1.0

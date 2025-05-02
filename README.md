@@ -5,18 +5,22 @@
 ## 🎯 Features
 
 - ✅ Real-time deepfake detection using MesoNet architecture
-- ✅ Multi-tile monitoring for Zoom meetings
+- ✅ Dynamic grid-based monitoring system
+- ✅ Real-time configuration adjustments
 - ✅ Adaptive face detection with fallback mechanisms
-- ✅ Risk score smoothing and buffering to reduce false positives
+- ✅ Risk score smoothing and buffering
 - ✅ Automatic logging of risk scores and flagged frames
-- ✅ Configurable detection thresholds and sensitivity
-- ✅ Support for both webcam and virtual camera inputs
+- ✅ Modern Electron-based UI
 
 ## 🛠️ Setup
 
 1. Install dependencies:
 ```bash
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Install Node.js dependencies
+npm install
 ```
 
 2. Download the pre-trained model weights:
@@ -26,48 +30,86 @@ pip install -r requirements.txt
 
 3. Run the application:
 ```bash
-# For webcam monitoring:
-python app.py
+# Run in development mode
+npm run dev
 
-# For Zoom window monitoring:
-python zoom_capture.py
+# Build and run in production
+npm run build
 ```
 
-## ⚙️ Configuration
+## 🎛️ Configuration
 
-Key parameters in `zoom_capture.py`:
-- `GRID_ROWS`, `GRID_COLS`: Number of tiles to monitor
-- `THRESHOLD`: Risk score threshold for alerts (default: 50)
-- `GAIN`: Score amplification factor (default: 1.2)
-- `BUFFER_SIZE`: Number of frames for score averaging (default: 40)
+The application features a real-time configuration panel that allows you to adjust:
 
-## 📊 Logging
+- **Grid Layout**
+  - Rows (1-4): Number of vertical tiles
+  - Columns (1-4): Number of horizontal tiles
+  - Useful for different Zoom layouts and participant counts
 
-- Risk scores are logged to `logs/risk_log.csv`
-- Flagged frames are saved to `logs/faces/` with timestamps
-- Each log entry includes:
-  - Timestamp
-  - Tile coordinates
-  - Risk score
+- **Detection Parameters**
+  - Alert Threshold (0-100%): Risk level that triggers alerts
+  - Amplification Gain (0.1-5.0): Adjusts sensitivity
+  - Buffer Size (1-100): Frames to average for smoothing
+
+Changes take effect immediately without requiring restart.
+
+## 📊 Monitoring
+
+- **Status Panel**
+  - Current operation status
+  - Number of active tiles being monitored
+  - Real-time alerts for detected deepfakes
+
+- **Alert System**
+  - Visual alerts for high-risk detections
+  - Risk percentage display
+  - Automatic alert clearing
+
+- **Logging**
+  - Risk scores logged to `logs/risk_log.csv`
+  - Flagged frames saved to `logs/faces/`
+  - Timestamps and tile coordinates included
 
 ## 🔍 How It Works
 
-1. Captures video feed from Zoom window or webcam
-2. Divides frame into configurable grid
-3. Detects faces in each tile
-4. Processes detected faces through MesoNet model
-5. Applies score smoothing and buffering
-6. Alerts when risk exceeds threshold
-7. Logs results for analysis
+1. **Initialization**
+   - Launches Electron UI
+   - Starts Python backend
+   - Establishes IPC communication
+
+2. **Detection Process**
+   - Captures Zoom window content
+   - Divides into configurable grid
+   - Performs face detection
+   - Analyzes each face with MesoNet
+   - Applies smoothing and thresholds
+   - Generates alerts for suspicious content
+
+3. **Data Flow**
+   - Real-time frame processing
+   - JSON-based communication
+   - Bidirectional config updates
+   - Asynchronous alert handling
 
 ## ⚠️ Notes
 
-- Requires OpenCV and Keras/TensorFlow
+- Requires OpenCV and TensorFlow
 - Works best with well-lit, front-facing video
 - May have false positives in low-light conditions
-- Performance depends on system resources
+- Performance depends on:
+  - System resources
+  - Grid size configuration
+  - Number of active participants
+
+## 🔧 Troubleshooting
+
+- Ensure Zoom window is visible and not minimized
+- Check lighting conditions for better detection
+- Adjust grid size to match Zoom's layout
+- Fine-tune threshold and gain for your environment
 
 ## 📝 License
+
 See LICENSE file for details
 
 ---

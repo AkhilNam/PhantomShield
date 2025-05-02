@@ -1,0 +1,44 @@
+{
+  "name": "phantomshield",
+  "version": "1.0.0",
+  "description": "PhantomShield is a real-time deepfake detection system for Zoom, Teams, and Meet. It analyzes facial frames and flags suspicious activity with real-time alerts.",
+  "main": "app/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "build": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AkhilNam/PhantomShield.git"
+  },
+  "keywords": ["deepfake", "detection", "electron", "python", "zoom", "security"],
+  "author": "Akhil Nampally",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/AkhilNam/PhantomShield/issues"
+  },
+  "homepage": "https://github.com/AkhilNam/PhantomShield#readme",
+  "devDependencies": {
+    "electron": "^36.1.0",
+    "electron-builder": "^24.9.1",
+    "cross-env": "^7.0.3"
+  },
+  "build": {
+    "appId": "com.phantomshield.app",
+    "productName": "PhantomShield",
+    "files": [
+      "app/**/*",
+      "backend/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend",
+        "to": "backend",
+        "filter": ["**/*"]
+      }
+    ]
+  }
+}

@@ -20,43 +20,90 @@ wheels/
 .installed.cfg
 *.egg
 
+# Node.js / Electron
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+.pnp.*
+electron-builder.yml
+out/
+release/
+
 # Virtual Environment
 venv/
 venv311/
 env/
 ENV/
+.env
+.venv
+.python-version
 
-# IDE
+# IDE and Editors
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-workspace
+*.sublime-project
+.vs/
+*.code-workspace
 
 # Project specific
 logs/
 *.log
 risk_log.csv
+logs/faces/
 
-# Model files (if you want to exclude them)
+# Model files
 *.h5
 *.pth
 *.pt
+*.onnx
+*.tflite
+model/weights/
 
 # Compiled files
 *.spec
 *.exe
 *.dll
+*.dylib
+*.so
+*.pyd
 
 # System files
 .DS_Store
 Thumbs.db
+.directory
+desktop.ini
 
-# Distribution
+# Distribution and Build
 dist/
 build/
+*.app/
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.snap
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb
 
 # Local development settings
 .env
+.env.local
+.env.*.local
+config.local.json
+
+# Testing
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover

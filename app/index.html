@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PhantomShield</title>
+  <style>
+    body { 
+      font-family: sans-serif; 
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .status {
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 4px;
+      background: #f0f0f0;
+    }
+    .alert { 
+      color: #d32f2f; 
+      font-weight: bold;
+      background: #ffebee;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+    }
+    .log {
+      background: #1e1e1e;
+      color: #fff;
+      padding: 1rem;
+      border-radius: 4px;
+      font-family: monospace;
+      height: 300px;
+      overflow-y: auto;
+      margin-top: 1rem;
+    }
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+    }
+    .config {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 4px;
+      margin: 1rem 0;
+    }
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .config-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    label {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    input[type="number"] {
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 100px;
+    }
+    button {
+      background: #2c3e50;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background: #34495e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PhantomShield</h1>
+    
+    <div class="config">
+      <h2>Configuration</h2>
+      <div class="config-grid">
+        <div class="config-item">
+          <label for="gridRows">Grid Rows</label>
+          <input type="number" id="gridRows" min="1" max="4" value="1">
+        </div>
+        <div class="config-item">
+          <label for="gridCols">Grid Columns</label>
+          <input type="number" id="gridCols" min="1" max="4" value="2">
+        </div>
+        <div class="config-item">
+          <label for="threshold">Alert Threshold (%)</label>
+          <input type="number" id="threshold" min="0" max="100" value="50">
+        </div>
+        <div class="config-item">
+          <label for="gain">Amplification Gain</label>
+          <input type="number" id="gain" min="0.1" max="5" step="0.1" value="1.2">
+        </div>
+        <div class="config-item">
+          <label for="bufferSize">Buffer Size</label>
+          <input type="number" id="bufferSize" min="1" max="100" value="40">
+        </div>
+      </div>
+      <button onclick="updateConfig()">Apply Configuration</button>
+    </div>
+
+    <div class="status">
+      <p>Status: <span id="status">Initializing...</span></p>
+      <p>Active Tiles: <span id="activeTiles">0</span></p>
+    </div>
+    <div id="alerts"></div>
+    <div id="log" class="log"></div>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>
