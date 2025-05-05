@@ -107,3 +107,24 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
+
+# Ignore embedded Python site-packages and build artifacts
+backend/python-3.11.0rc1-embed-amd64/*
+!backend/python-3.11.0rc1-embed-amd64/python.exe
+!backend/python-3.11.0rc1-embed-amd64/python3*.dll
+!backend/python-3.11.0rc1-embed-amd64/python311._pth
+!backend/python-3.11.0rc1-embed-amd64/README.txt
+
+# Ignore embeddable Python binaries and archives
+backend/python-3.11.0rc1-embed-amd64/*.exe
+backend/python-3.11.0rc1-embed-amd64/*.dll
+backend/python-3.11.0rc1-embed-amd64/*.zip
+backend/python-3.11.0rc1-embed-amd64/*.cat
+backend/python-3.11.0rc1-embed-amd64/*.pth
+backend/python-3.11.0rc1-embed-amd64/LICENSE.txt
+backend/python-3.11.0rc1-embed-amd64/get-pip.py
+
+# Explicitly add python.cat, python311._pth, and python311.zip in backend/python-3.11.0rc1-embed-amd64/ to .gitignore to prevent them from being committed
+backend/python-3.11.0rc1-embed-amd64/python.cat
+backend/python-3.11.0rc1-embed-amd64/python311._pth
+backend/python-3.11.0rc1-embed-amd64/python311.zip

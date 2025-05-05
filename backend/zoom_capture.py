@@ -1,15 +1,26 @@
+import os
+import sys
+
+# Robust sys.path logic for both dev and packaged environments
+if getattr(sys, 'frozen', False):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.insert(0, base_path)
+sys.path.insert(0, os.path.join(base_path, 'model'))
+sys.path.insert(0, os.path.join(base_path, 'camera'))
+sys.path.insert(0, os.path.join(base_path, 'audio'))
 import pygetwindow as gw
 import mss
 import cv2
+import threading
 import numpy as np
-import os
 import time
 import csv
 import json
 from collections import deque
 from model.detector import calculate_fake_risk
-import sys
-import threading
 sys.stdout.reconfigure(encoding='utf-8')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 

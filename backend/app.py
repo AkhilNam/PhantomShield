@@ -1,9 +1,21 @@
-import cv2
 import os
+import sys
+import cv2
 import csv
 from datetime import datetime
 from model.detector import calculate_fake_risk
 from camera.virtual_cam import start_camera_preview
+
+# Robust sys.path logic for both dev and packaged environments
+if getattr(sys, 'frozen', False):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.insert(0, base_path)
+sys.path.insert(0, os.path.join(base_path, 'model'))
+sys.path.insert(0, os.path.join(base_path, 'camera'))
+sys.path.insert(0, os.path.join(base_path, 'audio'))
 
 LOG_DIR = "logs"
 os.makedirs(LOG_DIR, exist_ok=True)

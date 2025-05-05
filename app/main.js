@@ -14,10 +14,15 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: false,
     },
+    icon: path.join(__dirname, 'assets/logo_WZ7_4.ico'),
   });
 
   mainWindow.loadFile('app/index.html');
   
+  // Hide the default menu bar for a cleaner look
+  mainWindow.setMenuBarVisibility(false);
+  mainWindow.setMenu(null);
+
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
@@ -25,7 +30,9 @@ function createWindow() {
 
 function startPythonBackend() {
   const pythonPath = isDev ? 'python' : path.join(process.resourcesPath, 'python/python.exe');
-  const scriptPath = path.join(__dirname, '../backend/zoom_capture.py');
+  const scriptPath = isDev
+    ? path.join(__dirname, '../backend/zoom_capture.py')
+    : path.join(process.resourcesPath, 'zoom_capture.py');
   
   pythonProcess = spawn(pythonPath, [scriptPath]);
 
