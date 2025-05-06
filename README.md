@@ -2,6 +2,8 @@
 
 **PhantomShield** is a real-time deepfake detection system that monitors video conferencing applications like Zoom, Microsoft Teams, and Google Meet. It analyzes facial frames for deepfake indicators and provides real-time risk assessment.
 
+![PhantomShield Demo](app/assets/githubdemo.png)
+
 ## 🎯 Features
 
 - ✅ Real-time deepfake detection using MesoNet architecture

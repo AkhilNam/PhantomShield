@@ -23,6 +23,9 @@ LOG_PATH = os.path.join(LOG_DIR, "risk_log.csv")
 
 smoothed_score = 0
 
+# Load face detector (same as in detector.py)
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
 def amplify_score(raw):
     gain = 1.5  # Amplify mid-high scores
     amplified = min(max(raw * gain, 0), 100)
@@ -34,9 +37,22 @@ def overlay_warning(frame, show_warning):
         cv2.putText(frame, text, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 3)
     return frame
 
+def get_largest_face(frame):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+    if len(faces) == 0:
+        return None
+    # Select the largest face
+    x, y, w, h = max(faces, key=lambda rect: rect[2] * rect[3])
+    return frame[y:y+h, x:x+w]
+
 def get_frame_overlay(frame):
     global smoothed_score
-    raw_score = calculate_fake_risk(frame)
+    face_crop = get_largest_face(frame)
+    if face_crop is not None:
+        raw_score = calculate_fake_risk(face_crop)
+    else:
+        raw_score = 0
     amplified_score = amplify_score(raw_score)
     smoothed_score = 0.85 * smoothed_score + 0.15 * amplified_score
     risk_score = int(smoothed_score)

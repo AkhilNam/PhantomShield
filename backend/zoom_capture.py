@@ -130,16 +130,21 @@ def scan_zoom_tiles_with_face_detection(frame):
             if len(faces) > 0:
                 active_tiles += 1
                 (fx, fy, fw, fh) = max(faces, key=lambda f: f[2] * f[3])
-                pad = int(0.2 * min(fw, fh))
-                fx, fy = max(0, fx - pad), max(0, fy - pad)
-                fw, fh = fw + 2 * pad, fh + 2 * pad
-                face_crop = tile[fy:fy+fh, fx:fx+fw]
+                face_crop = tile[fy:fy+fh, fx:fx+fw]  # No padding, just the detected face
+                # Debug: Save the face crop
+                debug_path = f"logs/faces/debug_face_{row}_{col}_{int(time.time())}.jpg"
+                result = cv2.imwrite(debug_path, face_crop)
+                print(f"Saved {debug_path}: {result}, shape: {face_crop.shape}")
                 raw_score = calculate_fake_risk(face_crop)
                 cropped_image = face_crop
             else:
                 # fallback center crop
                 mx, my = tile.shape[1] // 5, tile.shape[0] // 5
                 fallback = tile[my:-my, mx:-mx]
+                # Debug: Save the fallback crop
+                debug_path = f"logs/faces/debug_fallback_{row}_{col}_{int(time.time())}.jpg"
+                result = cv2.imwrite(debug_path, fallback)
+                print(f"Saved {debug_path}: {result}, shape: {fallback.shape}")
                 raw_score = calculate_fake_risk(fallback)
                 cropped_image = fallback
 
