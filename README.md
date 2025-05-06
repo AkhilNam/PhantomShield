@@ -95,7 +95,7 @@ Changes take effect immediately without requiring restart.
 
 ## ⚠️ Notes
 
-- Requires OpenCV and TensorFlow
+- Requires OpenCV and Pytorch
 - Works best with well-lit, front-facing video
 - May have false positives in low-light conditions
 - Performance depends on:
